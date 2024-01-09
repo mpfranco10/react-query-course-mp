@@ -3,6 +3,15 @@ import { GoIssueOpened, GoIssueClosed, GoComment } from "react-icons/go";
 import { relativeDate } from "../helpers/relativeDate";
 import { useUserData } from "../helpers/useUserData";
 
+const Label = ({ label, labelsData }) => {
+  const { data, isLoading } = labelsData;
+
+  if (isLoading) return null;
+
+  const labelObj = data.find((queryLabel) => queryLabel.id === label);
+  if (!labelObj) return null;
+  return <span className={`label ${labelObj.color}`}>{labelObj.name}</span>;
+};
 export const IssueItem = ({
   title,
   number,
@@ -12,9 +21,12 @@ export const IssueItem = ({
   createdDate,
   labels,
   status,
+  labelsData,
 }) => {
-  const assigneeUser = useUserData(assignee);
-  const createdByUser = useUserData(createdBy);
+  const { data: assigneeUserData, isSuccess: assigneeUserSuccess } =
+    useUserData(assignee);
+  const { data: createdByUserData, isSuccess: createdByUserSuccess } =
+    useUserData(createdBy);
   return (
     <li>
       <div>
@@ -28,23 +40,23 @@ export const IssueItem = ({
         <span>
           <Link to={`/issue/${number}`}>{title}</Link>
           {labels.map((label) => (
-            <span key={label} className={`label red`}>
-              {label}
-            </span>
+            <Label key={label} label={label} labelsData={labelsData} />
           ))}
         </span>
         <small>
           #{number} opened {relativeDate(createdDate)}{" "}
-          {createdByUser.isSuccess ? `by ${createdByUser.data.name}` : null}
+          {createdByUserSuccess ? `by ${createdByUserData.name}` : null}
         </small>
       </div>
-      {assigneeUser.isSuccess && (
-        <img
-          src={assigneeUser.data.profilePictureUrl}
-          className="assigned-to"
-          alt={`Assigned to ${assigneeUser.data.name}`}
-        />
-      )}
+      {assigneeUserSuccess &&
+        assigneeUserData &&
+        assigneeUserData.profilePictureUrl && (
+          <img
+            src={assigneeUserData.profilePictureUrl}
+            className="assigned-to"
+            alt={`Assigned to ${assigneeUserData.name}`}
+          />
+        )}
       <span className="comment-count">
         {commentCount > 0 && (
           <>

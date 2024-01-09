@@ -1,10 +1,11 @@
 import { useQuery } from "react-query";
 import { IssueItem } from "./IssueItem";
 
-export default function IssuesList() {
-  const { isLoading, data } = useQuery(["issues"], () =>
-    fetch("/api/issues").then((res) => res.json())
-  );
+export default function IssuesList({ labelsData, labels }) {
+  const { isLoading, data } = useQuery(["issues", { labels }], () => {
+    const labelsString = labels.map((label) => `labels[]=${label}`).join("&");
+    return fetch(`/api/issues?${labelsString}`).then((res) => res.json());
+  });
   return (
     <div>
       <h1>Issues List</h1>
@@ -14,6 +15,7 @@ export default function IssuesList() {
         <ul className="issues-list">
           {data.map((issue) => (
             <IssueItem
+              labelsData={labelsData}
               key={issue.id}
               title={issue.title}
               number={issue.number}
