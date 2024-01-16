@@ -2,9 +2,11 @@ import { useState } from "react";
 import IssuesList from "../components/IssuesList";
 import LabelList from "../components/LabelList";
 import useLabelsData from "../helpers/useLabelsData";
+import { StatusSelect } from "../components/StatusSelect";
 
 export default function Issues() {
   const [labels, setLabels] = useState([]);
+  const [status, setStatus] = useState("");
   const labelsData = useLabelsData();
 
   return (
@@ -12,7 +14,7 @@ export default function Issues() {
       <main>
         <section>
           <h1>Issues</h1>
-          <IssuesList labelsData={labelsData} labels={labels} />
+          <IssuesList labelsData={labelsData} labels={labels} status={status} />
         </section>
         <aside>
           <LabelList
@@ -27,6 +29,11 @@ export default function Issues() {
                   : currentLabels.concat(label)
               )
             }
+          />
+          <h3>Status</h3>
+          <StatusSelect
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
           />
         </aside>
       </main>
