@@ -1,19 +1,25 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { IssueHeader } from "./IssueHeader";
 import { Comment } from "./Comment";
 
 function useIssueData(issueNumber) {
-  return useQuery(["issues", issueNumber], () => {
-    return fetch(`/api/issues/${issueNumber}`).then((res) => res.json());
+  return useQuery({
+    queryKey: ["issues", issueNumber],
+    queryFn: async () => {
+      const res = await fetch(`/api/issues/${issueNumber}`);
+      return await res.json();
+    },
   });
 }
 
 function useIssueComments(issueNumber) {
-  return useQuery(["issues", issueNumber, "comments"], () => {
-    return fetch(`/api/issues/${issueNumber}/comments`).then((res) =>
-      res.json()
-    );
+  return useQuery({
+    queryKey: ["issues", issueNumber, "comments"],
+    queryFn: async () => {
+      const res = await fetch(`/api/issues/${issueNumber}/comments`);
+      return await res.json();
+    },
   });
 }
 
