@@ -6,8 +6,8 @@ import { Comment } from "./Comment";
 function useIssueData(issueNumber) {
   return useQuery({
     queryKey: ["issues", issueNumber],
-    queryFn: async () => {
-      const res = await fetch(`/api/issues/${issueNumber}`);
+    queryFn: async ({ signal }) => {
+      const res = await fetch(`/api/issues/${issueNumber}`, { signal });
       return await res.json();
     },
   });
@@ -16,8 +16,10 @@ function useIssueData(issueNumber) {
 function useIssueComments(issueNumber) {
   return useQuery({
     queryKey: ["issues", issueNumber, "comments"],
-    queryFn: async () => {
-      const res = await fetch(`/api/issues/${issueNumber}/comments`);
+    queryFn: async ({ signal }) => {
+      const res = await fetch(`/api/issues/${issueNumber}/comments`, {
+        signal,
+      });
       return await res.json();
     },
   });

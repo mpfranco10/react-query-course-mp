@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { IssueItem } from "./IssueItem";
 import { useState } from "react";
 import fetchWithError from "../helpers/fetchWithError";
+import Loader from "./Loader";
 
 export default function IssuesList({ labelsData, labels, status }) {
   const {
@@ -9,12 +10,15 @@ export default function IssuesList({ labelsData, labels, status }) {
     data: issuesData,
     isError: isErrorIssues,
     error: issuesError,
+    isFetching: isIssuesQueryFetching,
   } = useQuery({
     queryKey: ["issues", { labels, status }],
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       const statusString = status ? `&status=${status}` : "";
       const labelsString = labels.map((label) => `labels[]=${label}`).join("&");
-      return fetchWithError(`/api/issues?${labelsString}${statusString}`);
+      return fetchWithError(`/api/issues?${labelsString}${statusString}`, {
+        signal,
+      });
     },
   });
 
@@ -23,11 +27,10 @@ export default function IssuesList({ labelsData, labels, status }) {
 
   const { isLoading: isLoadingSearch, data: searchData } = useQuery({
     queryKey: ["issues", "search", searchValue],
-    queryFn: () => {
-      return fetch(`/api/search/issues?q=${searchValue}`).then((res) =>
+    queryFn: ({ signal }) =>
+      fetch(`/api/search/issues?q=${searchValue}`, { signal }).then((res) =>
         res.json()
-      );
-    },
+      ),
     enabled: isSearching,
   });
 
@@ -52,7 +55,10 @@ export default function IssuesList({ labelsData, labels, status }) {
           }}
         />
       </form>
-      <h2>{!isSearching ? "Issues List" : "Search results"}</h2>
+      {isSearching && <h2>Search Results</h2>}
+      {!isSearching && (
+        <h2>Issues List {isIssuesQueryFetching && <Loader />}</h2>
+      )}
       {(isLoadingIssues || isLoadingSearch) && <p>Loading....</p>}
       {isErrorIssues && <p>{issuesError.message}</p>}
       {issuesData && !isSearching && (
