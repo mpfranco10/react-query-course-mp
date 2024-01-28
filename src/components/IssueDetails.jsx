@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { IssueHeader } from "./IssueHeader";
 import { Comment } from "./Comment";
+import IssueStatus from "./IssueStatus";
 
 function useIssueData(issueNumber) {
   return useQuery({
@@ -48,7 +49,12 @@ export default function IssueDetails() {
                 ))
               )}
             </section>
-            <aside></aside>
+            <aside>
+              <IssueStatus
+                status={data?.status}
+                issueNumber={data?.number.toString()}
+              />
+            </aside>
           </main>
         </>
       )}
