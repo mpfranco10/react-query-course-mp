@@ -1,10 +1,35 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { IssueItem } from "./IssueItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import fetchWithError from "../helpers/fetchWithError";
 import Loader from "./Loader";
 
-export default function IssuesList({ labelsData, labels, status }) {
+const fetchIssues = async ({ status, labels, pageNum, signal }) => {
+  const statusString = status ? `&status=${status}` : "";
+  const labelsString = labels.map((label) => `labels[]=${label}`).join("&");
+  const paginationString = pageNum ? `&page=${pageNum}` : "";
+
+  const results = await fetchWithError(
+    `/api/issues?${labelsString}${statusString}${paginationString}`,
+    {
+      signal,
+    }
+  );
+
+  return results;
+};
+
+export default function IssuesList({
+  labelsData,
+  labels,
+  status,
+  pageNum,
+  setPageNum,
+}) {
   const queryClient = useQueryClient();
   const {
     isLoading: isLoadingIssues,
@@ -12,17 +37,11 @@ export default function IssuesList({ labelsData, labels, status }) {
     isError: isErrorIssues,
     error: issuesError,
     isFetching: isIssuesQueryFetching,
+    isPlaceholderData,
   } = useQuery({
-    queryKey: ["issues", { labels, status }],
+    queryKey: ["issues", { labels, status, pageNum }],
     queryFn: async ({ signal }) => {
-      const statusString = status ? `&status=${status}` : "";
-      const labelsString = labels.map((label) => `labels[]=${label}`).join("&");
-      const results = await fetchWithError(
-        `/api/issues?${labelsString}${statusString}`,
-        {
-          signal,
-        }
-      );
+      const results = await fetchIssues({ status, labels, pageNum, signal });
 
       results.forEach((issue) => {
         queryClient.setQueryData(["issues", issue.number.toString()], issue);
@@ -30,7 +49,18 @@ export default function IssuesList({ labelsData, labels, status }) {
 
       return results;
     },
+    placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["issues", { labels, status, pageNum: pageNum + 1 }],
+      queryFn: async ({ signal }) => {
+        const results = await fetchIssues({ status, labels, pageNum, signal });
+        return results;
+      },
+    });
+  }, [pageNum]);
 
   const [searchValue, setSearchValue] = useState("");
   const isSearching = !!searchValue;
@@ -72,22 +102,49 @@ export default function IssuesList({ labelsData, labels, status }) {
       {(isLoadingIssues || isLoadingSearch) && <p>Loading....</p>}
       {isErrorIssues && <p>{issuesError.message}</p>}
       {issuesData && !isSearching && (
-        <ul className="issues-list">
-          {issuesData.map((issue) => (
-            <IssueItem
-              labelsData={labelsData}
-              key={issue.id}
-              title={issue.title}
-              number={issue.number}
-              assignee={issue.assignee}
-              commentCount={issue.comments.length}
-              createdBy={issue.createdBy}
-              createdDate={issue.createdDate}
-              labels={issue.labels}
-              status={issue.status}
-            />
-          ))}
-        </ul>
+        <>
+          <ul className="issues-list">
+            {issuesData.map((issue) => (
+              <IssueItem
+                labelsData={labelsData}
+                key={issue.id}
+                title={issue.title}
+                number={issue.number}
+                assignee={issue.assignee}
+                commentCount={issue.comments.length}
+                createdBy={issue.createdBy}
+                createdDate={issue.createdDate}
+                labels={issue.labels}
+                status={issue.status}
+              />
+            ))}
+          </ul>
+          <div className="pagination">
+            <button
+              onClick={() => {
+                if (pageNum - 1 > 0) {
+                  setPageNum(pageNum - 1);
+                }
+              }}
+              disabled={pageNum === 1}
+            >
+              Previous
+            </button>
+            <p>
+              Page {pageNum} {isIssuesQueryFetching ? "..." : ""}
+            </p>
+            <button
+              onClick={() => {
+                if (issuesData?.length !== 0 && !isPlaceholderData) {
+                  setPageNum(pageNum + 1);
+                }
+              }}
+              disabled={issuesData?.length === 0 || isPlaceholderData}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
       {isSearching && searchData && (
         <>

@@ -115,6 +115,12 @@ button:hover,
 .button:hover {
   background: var(--gold);
 }
+button:disabled,
+button[disabled] {
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}
 hr {
   width: 80%;
   border-color: #aaa;

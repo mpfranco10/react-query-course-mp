@@ -9,31 +9,42 @@ export default function Issues() {
   const [labels, setLabels] = useState([]);
   const [status, setStatus] = useState("");
   const labelsData = useLabelsData();
+  const [pageNum, setPageNum] = useState(1);
 
   return (
     <div>
       <main>
         <section>
-          <IssuesList labelsData={labelsData} labels={labels} status={status} />
+          <IssuesList
+            labelsData={labelsData}
+            labels={labels}
+            status={status}
+            pageNum={pageNum}
+            setPageNum={setPageNum}
+          />
         </section>
         <aside>
           <LabelList
             labelsData={labelsData}
             selected={labels}
-            toggle={(label) =>
+            toggle={(label) => {
               setLabels((currentLabels) =>
                 currentLabels.includes(label)
                   ? currentLabels.filter(
                       (currentLabel) => currentLabel !== label
                     )
                   : currentLabels.concat(label)
-              )
-            }
+              );
+              setPageNum(1);
+            }}
           />
           <h3>Status</h3>
           <StatusSelect
             value={status}
-            onChange={(event) => setStatus(event.target.value)}
+            onChange={(event) => {
+              setStatus(event.target.value);
+              setPageNum(1);
+            }}
           />
           <Link className="button" to="/add">
             Add Issue
