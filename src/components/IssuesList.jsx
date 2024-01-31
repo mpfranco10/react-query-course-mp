@@ -17,7 +17,7 @@ const fetchIssues = async ({ status, labels, pageNum, signal }) => {
     `/api/issues?${labelsString}${statusString}${paginationString}`,
     {
       signal,
-    }
+    },
   );
 
   return results;
@@ -69,7 +69,7 @@ export default function IssuesList({
     queryKey: ["issues", "search", searchValue],
     queryFn: ({ signal }) =>
       fetch(`/api/search/issues?q=${searchValue}`, { signal }).then((res) =>
-        res.json()
+        res.json(),
       ),
     enabled: isSearching,
   });

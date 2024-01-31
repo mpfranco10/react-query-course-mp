@@ -31,9 +31,9 @@ export default function Issues() {
               setLabels((currentLabels) =>
                 currentLabels.includes(label)
                   ? currentLabels.filter(
-                      (currentLabel) => currentLabel !== label
+                      (currentLabel) => currentLabel !== label,
                     )
-                  : currentLabels.concat(label)
+                  : currentLabels.concat(label),
               );
               setPageNum(1);
             }}

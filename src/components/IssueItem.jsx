@@ -38,9 +38,10 @@ export const IssueItem = ({
           queryKey: ["issues", number.toString()],
           queryFn: () => fetchWithError(`/api/issues/${number}`),
         });
-        queryClient.prefetchQuery({
+        queryClient.prefetchInfiniteQuery({
           queryKey: ["issues", number.toString(), "comments"],
-          queryFn: () => fetchWithError(`/api/issues/${number}/comments`),
+          queryFn: () =>
+            fetchWithError(`/api/issues/${number}/comments?page=1`),
         });
       }}
     >

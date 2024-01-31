@@ -21,7 +21,7 @@ new Promise((res) => setTimeout(res, 100))
     worker.start({
       quiet: true,
       onUnhandledRequest: "bypass",
-    })
+    }),
   )
   .then(() => {
     root.render(
@@ -34,6 +34,6 @@ new Promise((res) => setTimeout(res, 100))
             </div>
           </BrowserRouter>
         </QueryClientProvider>
-      </React.StrictMode>
+      </React.StrictMode>,
     );
   });

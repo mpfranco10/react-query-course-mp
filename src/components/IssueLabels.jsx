@@ -67,7 +67,7 @@ const IssueLabels = ({ labels, issueNumber }) => {
           ? null
           : labels.map((label) => {
               const labelObject = labelsQuery.data.find(
-                (queryLabel) => queryLabel.id === label
+                (queryLabel) => queryLabel.id === label,
               );
 
               return labelObject ? (
